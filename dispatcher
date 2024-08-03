@@ -1,0 +1,37 @@
+class Dispatcher:
+    def __init__(self):
+        self._handlers = []
+
+    def handle_message(self, title, description):
+        def decorator(func):
+            self._handlers.append({'func': func, "description": description, 'title': title})
+            return func
+
+        return decorator
+
+    def run(self):
+        move = True
+        commands_descriptions = get_commands_list(self._handlers)
+        menu = f"Оберіть дію: \n{commands_descriptions}\n: "
+        while move:
+            cmd = input(menu)
+            if not cmd:
+                break
+
+            for handler in self._handlers:
+                if cmd.startswith(handler['title']) or cmd == handler['title']:
+                    handler['func'](cmd)
+                    break
+            else:
+                print('Невірна команда!')
+'''
+[{'func': func, "description": description, 'filter': filter_}]
+'''
+
+
+def get_commands_list(handlers):
+    lines = []
+    for item in handlers:
+        lines.append(f'{item['title']} - {item['description']}')
+
+    return "\n".join(lines)
