@@ -1,0 +1,78 @@
+from dispatcher import Dispatcher
+from dbmanager import DBManager
+from PycharmProjects.pythonProject.filters import Command, CommandWithParams
+
+
+# file_manager = JSONFileManager("data.json")
+
+
+dispatcher = Dispatcher()
+db = DBManager("db_IT_descriptions")
+"""
+handlers = [
+    {'func': create_task, 'filter': Command('create'), 'description': "Створити задачу"},
+    {'func': create_task_, 'filter': CommandWithParam('create'), 'description': "Створити задачу"},
+    {'func': show_all_tasks, 'filter': Command('show_all'), 'description': "Переглянути всі задачі"},
+
+]
+
+message: "/create asd  asd asd "
+
+cmd = Command('show_all')
+cmd.check("/show_all")
+"""
+
+
+
+@dispatcher.handle_message('c ', "Створити задачу")
+def create_task_(message: str):
+    """
+    message: "/create Прибирання в кімнаті. Помити підлогу, протерти пил"
+    ["/create", "Прибирання в кімнаті. Помити підлогу, протерти пил"]
+
+    """
+    if message.startswith('c '):
+        try:
+            title_description = message.split(' ', 1)[1]
+            title, description = title_description.split('. ', 1)
+            task = {'title': title, 'description': description}
+            db.add_task(task)
+            print(f'''
+        title: {title}
+        description: {description}
+        ''')
+        except ValueError:
+            print('Неправильний формат команди. Використовуйте: /create <заголовок>. <опис>')
+
+
+@dispatcher.handle_message('s', "Переглянути всі задачі")
+def show_all_tasks(message: str):
+     tasks = db.get_all_tasks()
+     print(tasks)
+
+
+@dispatcher.handle_message('e', "Змінити задачу")
+def change(message: str):
+    title_description = message.split(' ', 1)[1]
+    title, new_description = title_description.split('. ', 1)
+    db.edit_task(title, new_description)
+    show = db.get_all_tasks()
+    print(show)
+
+
+
+@dispatcher.handle_message('d', "Видалити задачу")
+def delete_task(message: str):
+    title = message.split(' ', 1)[1]
+
+    tasks = db.get_all_tasks()
+
+    for task in tasks:
+        if task[0] == title:
+            db.delete_task(title)
+
+
+
+
+
+dispatcher.run()
